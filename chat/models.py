@@ -1,3 +1,32 @@
+import django.db.models
 from django.db import models
+from django.db.models import CASCADE, DO_NOTHING
+from djongo.models import ObjectIdField, ArrayReferenceField
+from django.utils.translation import gettext_lazy as _
 
-# Create your models here.
+from userAuth.models import User
+
+
+class Message(models.Model):
+    _id = ObjectIdField()
+    messageBody = models.CharField(_("messageBody"), max_length=3096, blank=False)
+    sender = models.ForeignKey(to=User, on_delete=CASCADE)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    repliedFrom = models.ForeignKey(to="self", on_delete=DO_NOTHING, null=True)
+
+    def _str_(self):
+        return f"To: {self.sender} Body: {self.messageBody}"
+
+    class Meta:
+        ordering = ('timestamp',)
+
+
+class Channel(models.Model):
+    _id = ObjectIdField()
+    channelName = models.CharField(_("channelName"), max_length=32, blank=False)
+    createdBy = models.ForeignKey(to=User,on_delete=DO_NOTHING)
+    createdAt = models.DateTimeField(auto_now_add=True)
+    messages = ArrayReferenceField(to=Message,related_name="messages")
+
+    def __str__(self):
+        return f"Channel : {self.channelName}"
