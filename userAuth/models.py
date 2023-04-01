@@ -17,4 +17,3 @@ class User(AbstractUser):
 
     def id(self):
         return self._id
-
