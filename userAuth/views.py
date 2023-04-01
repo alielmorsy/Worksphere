@@ -1,84 +1,59 @@
-from django.shortcuts import render , HttpResponse  
-from django.http import JsonResponse
-from django.views import View
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
-from rest_framework_simplejwt import views as jwt_views
-import jwt
-from django.views.generic import TemplateView
-from django.contrib.auth import authenticate
-from datetime import datetime
-from django.conf import settings
-import json
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer , TokenVerifySerializer 
-from rest_framework_simplejwt.views import TokenObtainPairView , TokenVerifyView
-from rest_framework_simplejwt.backends import TokenBackend
-@method_decorator(csrf_exempt , name='post')
-class Login1(View):
+from django.shortcuts import render
+
+from rest_framework.parsers import JSONParser
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.views import APIView
+
+from .seralizers import LoginSerializer, RegisterSerializer
+from .services.loginService import LoginService
+
+
+class LoginView(APIView):
+    """
+    Login API End Point get should return a bad HTML PAGE.
+    The Posted Data should be username, and password it uses
+    LoginSerializer to validate the request and  authenticate the user.
+    Then Create A token and send it with the refresh token.
+
+    @author Ali Elmorsy
+    """
+
+    raise_exception = True
+
+    def __init__(self):
+        super().__init__()
+        self.service = LoginService()
+
     def get(self, request):
-        return HttpResponse(request)
-    @method_decorator(csrf_exempt)
+        return render(request, "As.html")
+
     def post(self, request, *args, **kwargs):
-        data = json.loads(request.body)
-        username = data['username']
-        password = data['password']
+        serializer = LoginSerializer(data=request.data)
 
-        user = authenticate(username=username, password=password)
-
-        if user is not None:
-            payload = {
-                'user_id': user._id,
-                'exp': datetime.now(),
-                'token_type': 'access'
-            }
-
-            user = {
-                'user': username,
-                'email': user.email,
-                'time': datetime.now().time(),
-            }
-
-            token = jwt.encode(payload, settings.SECRET_KEY).decode('utf-8')
-            print(token)
-            return JsonResponse({'success': 'true', 'token': token, 'user': user})
-
-        else:
-            return JsonResponse({'success': 'false', 'msg': 'The credentials provided are invalid.'})
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data
+        token = RefreshToken.for_user(user)
+        response = {
+            "access": token.access_token,
+            "refresh": str(token)
+        }
+        return Response(response)
 
 
-class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
-    def validate(self, attrs):
-        data = super().validate(attrs)
-        refresh = self.get_token(self.user)
-        data['access'] = str(refresh.access_token)
-        data['user'] = self.user.username
-        return data
+class RegisterView(APIView):
+    raise_exception = True
 
-class Login(TokenObtainPairView):
-    serializer_class = MyTokenObtainPairSerializer
+    def post(self, request, *args, **kwargs):
+        serializer = RegisterSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        print(serializer.validated_data)
+        return Response("asdwd")
 
-def get_user(request , token):
-    try:
-        valid_data = TokenBackend(algorithm='HS256').decode(token,verify=False)
-        print(valid_data)
-        user = valid_data['user_id']
-        request.user = user
-    except:
-        print("validation error")
 
-class myverifySerializer(TokenVerifySerializer):
-    def validate(self, attrs):
-        request = self.context.get('request', None)
-        data = request.data
-        print(request.data)
-        get_user(request , data['token'])
+class test(APIView):
+    permission_classes = (IsAuthenticated,)
 
-        data = super(myverifySerializer, self).validate(attrs)
-        data.update({'fullname': request.user})
-        return data
-
-class verify(TokenVerifyView):
-    serializer_class = myverifySerializer
-
-        
-        
+    def get(self, request, *args, **kwargs):
+        return Response({'message': 'success'})

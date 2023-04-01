@@ -1,10 +1,9 @@
-from django.contrib import admin
 from django.urls import path, include
-from .views import Login , verify
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework_simplejwt.views import TokenObtainPairView , TokenVerifyView
+
+from userAuth.views import *
 
 urlpatterns = [
-    path("", csrf_exempt(Login.as_view())),
-    path("verify/",csrf_exempt(verify.as_view())),
+    path("login", LoginView.as_view()),
+    path("test", test.as_view()),
+    path("register", RegisterView.as_view())
 ]
