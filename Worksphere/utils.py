@@ -28,13 +28,5 @@ class FieldError(Exception):
 
 
 if __name__ == "__main__":
-    dict = {"hello1": "!212"}
-    print("hello")
-
-
-    @check_parameters(("hello",))
-    def test(request):
-        print(request)
-
-
-    test(dict)
+   import  sqlparse
+   sqlparse.parse('SELECT %s AS "a" FROM "userAuth_user" WHERE "userAuth_user"."username" = %s LIMIT 1')

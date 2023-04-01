@@ -1,8 +1,11 @@
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, get_user_model
+from django.db import DatabaseError
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
+from rest_framework.validators import UniqueValidator
 
 from .models import User
-from .exceptions import InvalidCredentialsException
+from .exceptions import InvalidCredentialsException, RegisterException
 
 
 class LoginSerializer(serializers.Serializer):
@@ -27,6 +30,26 @@ class LoginSerializer(serializers.Serializer):
 
 
 class RegisterSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(max_length=32)
+
+    def create(self, validated_data):
+        user = User.objects.create_user(validated_data['username'], password=validated_data['password'],
+                                        first_name=validated_data['first_name'], last_name=validated_data['last_name'],
+                                        email=validated_data['email'])
+        return user
+
+    def validate_username(self, username):
+        user = None
+        try:
+            user = User.objects.get(username=username)
+        except:
+            pass
+        if user:
+            raise RegisterException()
+        return username
+
     class Meta:
-        model = User
+        model = get_user_model()
         fields = ["username", "password", "first_name", "last_name", "email"]
+        write_only_fields = ('password',)
+        read_only_fields = ('_id',)

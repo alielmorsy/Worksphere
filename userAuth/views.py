@@ -48,8 +48,14 @@ class RegisterView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = RegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        print(serializer.validated_data)
-        return Response("asdwd")
+        user = serializer.create(serializer.validated_data)
+        user.save()
+        token = RefreshToken.for_user(user)
+        response = {
+            "access": token.access_token,
+            "refresh": str(token)
+        }
+        return Response(response)
 
 
 class test(APIView):
