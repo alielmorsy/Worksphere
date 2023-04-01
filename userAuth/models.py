@@ -1,6 +1,4 @@
 from django.db.models import CASCADE
-
-
 from django.contrib.auth.models import AbstractUser
 from djongo.models import ArrayReferenceField, ObjectIdField
 
@@ -11,3 +9,5 @@ class User(AbstractUser):
 
     def __str__(self):
         return f"ID: {self._id}, userName: {self.username}"
+    def id(self):
+        return self._id
