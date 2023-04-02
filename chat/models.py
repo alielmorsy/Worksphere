@@ -12,13 +12,14 @@ class Message(models.Model):
     messageBody = models.CharField(_("messageBody"), max_length=3096, blank=False)
     sender = models.ForeignKey(to=User, on_delete=CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
-    repliedFrom = models.ForeignKey(to="self", on_delete=DO_NOTHING, null=True)
+    repliedFrom = models.ForeignKey(to="self" , on_delete=DO_NOTHING , null=True , blank=True)
 
     def _str_(self):
-        return f"To: {self.sender} Body: {self.messageBody}"
+        return f"To: {self.sender.username} Body: {self.messageBody}"
 
     class Meta:
         ordering = ('timestamp',)
+     
 
 
 class Channel(models.Model):
@@ -30,8 +31,11 @@ class Channel(models.Model):
     channelName = models.CharField(_("channelName"), max_length=32, blank=False)
     createdBy = models.ForeignKey(to=User, on_delete=DO_NOTHING)
     createdAt = models.DateTimeField(auto_now_add=True)
-    messages = ArrayReferenceField(to=Message, related_name="messages")
-    channelType = models.CharField(choices=ChannelType.choices, default=ChannelType.CHAT)
+    messages = ArrayReferenceField(to=Message, related_name="messages" , blank=False , null= True)
+    channelType = models.CharField(choices=ChannelType.choices, default=ChannelType.CHAT , max_length=10)
 
     def __str__(self):
         return f"Channel : {self.channelName}"
+
+    def welcome_massage(self):
+        return Message.objects.create(messageBody='Welcome to worksphere.\n invite friends into channel.')
