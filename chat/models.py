@@ -22,11 +22,16 @@ class Message(models.Model):
 
 
 class Channel(models.Model):
+    class ChannelType(models.TextChoices):
+        CHAT = 0, _("CHAT")
+        VOICE = 1, _("VOICE")
+
     _id = ObjectIdField()
     channelName = models.CharField(_("channelName"), max_length=32, blank=False)
-    createdBy = models.ForeignKey(to=User,on_delete=DO_NOTHING)
+    createdBy = models.ForeignKey(to=User, on_delete=DO_NOTHING)
     createdAt = models.DateTimeField(auto_now_add=True)
-    messages = ArrayReferenceField(to=Message,related_name="messages")
+    messages = ArrayReferenceField(to=Message, related_name="messages")
+    channelType = models.CharField(choices=ChannelType.choices, default=ChannelType.CHAT)
 
     def __str__(self):
         return f"Channel : {self.channelName}"
