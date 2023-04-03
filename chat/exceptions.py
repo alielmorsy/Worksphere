@@ -1,10 +1,6 @@
 from django.utils.translation import gettext as _
 from rest_framework.exceptions import APIException
 
-class InvalidCredentialsException(APIException):
-    status_code = 401
-    default_detail = _('Wrong username or password.')
-    default_code = 'invalid-credentials'
 
 
 class UserDoesnotExist(APIException):
@@ -15,4 +11,9 @@ class UserDoesnotExist(APIException):
 class ChannelDoesnotExist(APIException):
     status_code = 401
     default_detail = _('Channel Does not exist')
+    default_code = 'invalid-credentials'
+    
+class UserIsNotInChannel(APIException):
+    status_code = 401
+    default_detail = _('this user is not in the channel\n goin channel first')
     default_code = 'invalid-credentials'

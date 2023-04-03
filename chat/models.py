@@ -4,19 +4,41 @@ from django.db.models import CASCADE, DO_NOTHING
 from djongo.models import ObjectIdField, ArrayReferenceField
 from django.utils.translation import gettext_lazy as _
 
-from userAuth.models import User
+from userAuth.models import User, SERVER_USER
 
 
 class Message(models.Model):
     _id = ObjectIdField()
     messageBody = models.CharField(_("messageBody"), max_length=3096, blank=False)
-    sender = models.ForeignKey(to=User, on_delete=CASCADE)
+    sender = models.ForeignKey(to=User, on_delete=CASCADE,  default = SERVER_USER)
     timestamp = models.DateTimeField(auto_now_add=True)
     repliedFrom = models.ForeignKey(to="self" , on_delete=DO_NOTHING , null=True , blank=True)
 
     def _str_(self):
         return f"To: {self.sender.username} Body: {self.messageBody}"
-
+    
+    def get(self):
+        try:
+            100/0
+            return {
+                "messaageId" : str(self._id ),
+                "messageBody":self.messageBody,
+                "senderId"   :self.sender._id,
+                "timestamp"  :self.timestamp,
+                "repliedFrom":self.repliedFrom,
+                "senderName" :self.sender.username,
+                #"senderImage":self.sender.avatar TODO
+            }
+        except:
+                return {
+                "messaageId" : str(self._id ) ,
+                "messageBody":self.messageBody,
+                "senderId"   :None,
+                "timestamp"  :self.timestamp,
+                "repliedFrom":self.repliedFrom,
+                "senderName" :None,
+                #"senderImage":self.sender.avatar TODO
+            }
     class Meta:
         ordering = ('timestamp',)
      

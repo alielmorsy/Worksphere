@@ -9,7 +9,7 @@ from bson import ObjectId
 
 
 
-class ChannelSerializer(serializers.ModelSerializer):
+class CreateChannelSerializer(serializers.ModelSerializer):
     createdBy = serializers.CharField(max_length=32)
     def create(self, validated_data):
         channel = Channel.objects.create(   createdBy =User.objects.get(username=validated_data['createdBy']) , 
@@ -19,7 +19,7 @@ class ChannelSerializer(serializers.ModelSerializer):
         channel.messages.add(channel.welcome_massage())
         return channel
 
-    def validate_createdBy_____test(self, createdBy):
+    def validate_createdBy(self, createdBy):
         #user = User.objects.get(username=username)
         try:
             user = User.objects.get(username=createdBy)
@@ -32,7 +32,32 @@ class ChannelSerializer(serializers.ModelSerializer):
         fields = ["channelName", "createdBy", "channelType"]
         read_only_fields = ('_id',)
 
-class MassageSerializer(serializers.ModelSerializer):
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class SendMassageSerializer(serializers.ModelSerializer):
     sender = serializers.CharField(max_length=32)
     Channel = serializers.CharField(max_length=32)
 
@@ -45,23 +70,22 @@ class MassageSerializer(serializers.ModelSerializer):
         except:
             replied_from = None
 
-
-        message = Message.objects.create(   sender =User.objects.get(username=validated_data['sender']) , 
+        
+        message = Message.objects.create(   sender =self.validate_and_get_sender(validated_data['sender']) , 
                                             messageBody=validated_data['messageBody'],
                                             repliedFrom = replied_from,
                                         )
-        Channel.objects.get(_id = ObjectId(validated_data['Channel'])).messages.add(message)
+        self.validate_and_get_Channel(validated_data['Channel']).messages.add(message)
         return message
 
-    def validate_sender_____test(self, sender):
-        #user = User.objects.get(username=username)
+    def validate_and_get_sender(self, sender):
         try:
             user = User.objects.get(username=sender)
         except:
             raise UserDoesnotExist()
         return user
     
-    def validate_Channel_____test(self, Channel):
+    def validate_and_get_Channel(self, Channel):
         #user = User.objects.get(username=username)
         try:
             channel = models.Channel.objects.get(_id = ObjectId(Channel))
