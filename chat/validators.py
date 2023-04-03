@@ -26,7 +26,7 @@ class Validate_channel_and_user():
         except:
             raise ChannelDoesnotExist()
         return channel
-    def validate(self):
+    def validate(self):      # it will be adjusted later to check if user in company server users
         self.user = self.validate_and_get_sender(self.userid)
         self.channel = self.validate_and_get_sender(self.channelid)
         if self.userid != str(self.channel.createdBy._id):
