@@ -7,7 +7,6 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.views import APIView
 
 from .seralizers import LoginSerializer, RegisterSerializer
-from .services.loginService import LoginService
 
 
 class LoginView(APIView):
@@ -24,7 +23,6 @@ class LoginView(APIView):
 
     def __init__(self):
         super().__init__()
-        self.service = LoginService()
 
     def get(self, request):
         return render(request, "As.html")
@@ -36,7 +34,7 @@ class LoginView(APIView):
         user = serializer.validated_data
         token = RefreshToken.for_user(user)
         response = {
-            "access": token.access_token,
+            "access": str(token.access_token),
             "refresh": str(token)
         }
         return Response(response)
@@ -52,7 +50,7 @@ class RegisterView(APIView):
         user.save()
         token = RefreshToken.for_user(user)
         response = {
-            "access": token.access_token,
+            "access": str(token.access_token),
             "refresh": str(token)
         }
         return Response(response)
