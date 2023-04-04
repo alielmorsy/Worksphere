@@ -18,5 +18,3 @@ class User(AbstractUser):
     def id(self):
         return self._id
 
-
-SERVER_USER = User.objects.get(username='mo')

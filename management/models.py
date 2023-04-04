@@ -16,6 +16,12 @@ class Company(models.Model):
     createdAt = models.DateTimeField(auto_now_add=True)
 
 
+class CompanyUser(models.Model):
+    _id = ObjectIdField()
+    company = models.ForeignKey(to=Company, on_delete=CASCADE)
+    roles = ArrayReferenceField(to=Role)
+
+
 class Task(models.Model):
     _id = ObjectIdField()
     taskName = models.CharField(_("taskName"), max_length=128)

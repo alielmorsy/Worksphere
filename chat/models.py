@@ -4,44 +4,43 @@ from django.db.models import CASCADE, DO_NOTHING
 from djongo.models import ObjectIdField, ArrayReferenceField
 from django.utils.translation import gettext_lazy as _
 
-from userAuth.models import User, SERVER_USER
+from userAuth.models import User
 
 
 class Message(models.Model):
     _id = ObjectIdField()
-    messageBody = models.CharField(_("messageBody"), max_length=3096, blank=False)
-    sender = models.ForeignKey(to=User, on_delete=CASCADE,  default = SERVER_USER)
+    messageBody = models.CharField(_("messageBody"), max_length=4*1024, blank=False)
+    sender = models.ForeignKey(to=User, on_delete=CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
-    repliedFrom = models.ForeignKey(to="self" , on_delete=DO_NOTHING , null=True , blank=True)
+    repliedFrom = models.ForeignKey(to="self", on_delete=DO_NOTHING, null=True, blank=True)
 
     def _str_(self):
         return f"To: {self.sender.username} Body: {self.messageBody}"
-    
+
     def get(self):
         try:
-            100/0
             return {
-                "messaageId" : str(self._id ),
-                "messageBody":self.messageBody,
-                "senderId"   :self.sender._id,
-                "timestamp"  :self.timestamp,
-                "repliedFrom":self.repliedFrom,
-                "senderName" :self.sender.username,
-                #"senderImage":self.sender.avatar TODO
+                "messaageId": str(self._id),
+                "messageBody": self.messageBody,
+                "senderId": self.sender._id,
+                "timestamp": self.timestamp,
+                "repliedFrom": self.repliedFrom,
+                "senderName": self.sender.username,
+                # "senderImage":self.sender.avatar TODO
             }
         except:
-                return {
-                "messaageId" : str(self._id ) ,
-                "messageBody":self.messageBody,
-                "senderId"   :None,
-                "timestamp"  :self.timestamp,
-                "repliedFrom":self.repliedFrom,
-                "senderName" :None,
-                #"senderImage":self.sender.avatar TODO
+            return {
+                "messaageId": str(self._id),
+                "messageBody": self.messageBody,
+                "senderId": None,
+                "timestamp": self.timestamp,
+                "repliedFrom": self.repliedFrom,
+                "senderName": None,
+                # "senderImage":self.sender.avatar TODO
             }
+
     class Meta:
         ordering = ('timestamp',)
-     
 
 
 class Channel(models.Model):
@@ -53,8 +52,8 @@ class Channel(models.Model):
     channelName = models.CharField(_("channelName"), max_length=32, blank=False)
     createdBy = models.ForeignKey(to=User, on_delete=DO_NOTHING)
     createdAt = models.DateTimeField(auto_now_add=True)
-    messages = ArrayReferenceField(to=Message, related_name="messages" , blank=False , null= True)
-    channelType = models.CharField(choices=ChannelType.choices, default=ChannelType.CHAT , max_length=10)
+    messages = ArrayReferenceField(to=Message, related_name="messages", blank=False, null=True)
+    channelType = models.CharField(choices=ChannelType.choices, default=ChannelType.CHAT, max_length=10)
 
     def __str__(self):
         return f"Channel : {self.channelName}"
