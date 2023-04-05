@@ -12,13 +12,11 @@ class CompanyManager(DjongoManager):
         Custom create function that create Company object, add new role to that company,
         and assign the owner to that role
         """
-        if "owner" not in kwargs:
-            raise RuntimeWarning("Owner is not exists while creating the company")
         user = kwargs["companyOwner"]
         general_channel = Channel.objects.create(channelName="general", channelType=Channel.ChannelType.CHAT,
                                                  createdBy=user)
         self.channels.add(general_channel)
-        admin_role = Role(role_name="Admin", role_color=0xFFD700, permissions=DefaultPermissions.ADMIN)
+        admin_role = Role(role_name="Admin", role_color=0xFFD700, permissions=DefaultPermissions.ADMIN)  # Golden Color
         self.roles.add(admin_role)
         admin_company_user = CompanyUser(user=user)
         admin_company_user.roles.add(admin_role)

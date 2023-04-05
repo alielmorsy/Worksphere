@@ -1,6 +1,7 @@
 from django.shortcuts import render
 # Create your views her
 from django.shortcuts import render
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .serializer import CreateChannelSerializer, SendMassageSerializer
@@ -8,6 +9,7 @@ from .validators import Validate_channel_and_user
 
 
 class CreateChannelView(APIView):
+    permission_classes = (IsAuthenticated,)
     raise_exception = True
 
     def get(self, request):

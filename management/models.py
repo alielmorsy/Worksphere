@@ -20,6 +20,9 @@ class Company(models.Model):
 
     manager = CompanyManager()
 
+    def __str__(self):
+        return str(self._id)
+
 
 class Task(models.Model):
     _id = ObjectIdField()
