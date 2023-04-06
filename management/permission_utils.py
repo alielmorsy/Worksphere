@@ -27,7 +27,11 @@ class DefaultPermissions:
     ADMIN = REGULAR_USER | CAN_CHANGE_SETTINGS | CREATE_REMOVE_CHANNELS
 
 
-class IsUserInCompany(BasePermission):
+class IsUserCompany(BasePermission):
+    """
+    Permission class that only required for any request requires checks whether the user part of the company
+    or not. If not part of company a new error will be sent.
+    """
 
     def has_permission(self, request, view):
         user = request.user
@@ -36,4 +40,4 @@ class IsUserInCompany(BasePermission):
             models.Company.objects.get(_id=company_id, users__user___id=user.pk)
             return True
         except:
-            raise NotAllowed(detail=_("Not Allowed User"))
+            raise NotAllowed(detail=_("Not Allowed User, Or Invalid Company."))
