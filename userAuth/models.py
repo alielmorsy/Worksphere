@@ -4,6 +4,7 @@ from django.contrib.auth.models import AbstractUser
 from djongo.models import ArrayReferenceField, ObjectIdField
 from django.utils.translation import gettext_lazy as _
 
+# Company.objects.filter(users__user__username="alielmorsy")[0]
 
 class User(AbstractUser):
     _id = ObjectIdField()

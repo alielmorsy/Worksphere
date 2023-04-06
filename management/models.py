@@ -18,7 +18,7 @@ class Company(models.Model):
     createdAt = models.DateTimeField(auto_now_add=True)
     roles = ArrayReferenceField(to=Role, related_name="roles", on_delete=CASCADE)
 
-    manager = CompanyManager()
+    objects = CompanyManager()
 
     def __str__(self):
         return str(self._id)

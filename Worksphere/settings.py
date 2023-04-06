@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 from pathlib import Path
 import os
 from datetime import timedelta
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -57,6 +58,7 @@ SIMPLE_JWT = {
     'USER_ID_FIELD': '_id',
     'AUTH_HEADER_TYPES': ('Bearer',),
     'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
+    'TOKEN_USER_CLASS': 'userAuth.models.User'
 
 }
 TEMPLATES = [
@@ -115,7 +117,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTStatelessUserAuthentication',
+        'userAuth.authentication.UserAuthentication',
     )
 }
 AUTHENTICATION_BACKENDS = [
