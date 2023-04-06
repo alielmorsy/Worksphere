@@ -17,6 +17,7 @@ class CreateChannelSerializer(serializers.ModelSerializer):
         channel = Channel.objects.create(createdBy=User.objects.get(username=validated_data['createdBy']),
                                          channelName=validated_data['channelName'],
                                          channelType=validated_data['channelType'])
+        company_id = validated_data["company_id"]
         return channel
 
     def validate_createdBy(self, createdBy):

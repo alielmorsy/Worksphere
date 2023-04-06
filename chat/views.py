@@ -1,34 +1,20 @@
+from bson import ObjectId
 from django.shortcuts import render
 # Create your views her
 from django.shortcuts import render
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+from management.base import AuthorizedCompanyBase
+from management.permission_utils import IsUserInCompany
 from .serializer import CreateChannelSerializer, SendMassageSerializer
 from .validators import Validate_channel_and_user
 
 
-class CreateChannelView(APIView):
-    permission_classes = (IsAuthenticated,)
+class CreateChannelView(APIView, AuthorizedCompanyBase):
+    permission_classes = (IsAuthenticated, IsUserInCompany)
     raise_exception = True
-
-    def get(self, request):
-        MESSAGES_PER_PAGE = 40
-        userid = request.query_params['user']
-        channelid = request.query_params['channelid']
-        No_messages = int(request.query_params['pages']) * MESSAGES_PER_PAGE
-        validated_data = Validate_channel_and_user(userid, channelid)
-        channel = validated_data.channel
-        messages = []
-        for message in channel.messages.all()[:No_messages]:
-            messages.append(message.get())
-
-        response = {
-            "channelId": channelid,
-            "numberOfMessages": No_messages,
-            "messages": messages
-        }
-        return Response(response)
 
     def post(self, request, *args, **kwargs):
         print(request.user)
@@ -41,6 +27,13 @@ class CreateChannelView(APIView):
             "State": 'channel named ' + channel.channelName + ' Created succefully'
         }
         return Response(response)
+
+    def get_company_id(self, request):
+        data = request.data
+        if "company_id" not in data:
+            raise RuntimeError("Bad Request")
+
+        return ObjectId(data["companyId"])
 
 
 class SendMessageView(APIView):

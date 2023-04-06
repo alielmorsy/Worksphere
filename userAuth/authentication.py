@@ -14,6 +14,9 @@ class UserAuthentication(JWTAuthentication):
         """
         try:
             user_id = validated_token["user_id"]
-            return User.objects.get(pk=ObjectId(user_id))
+            user = User.objects.get(pk=ObjectId(user_id))
+            if not user.is_active:
+                raise RuntimeWarning(_("User is disabled by admin roles. Contact support"))
+            return user
         except:
-            raise InvalidToken(_("Invalid Login Token"))
+            raise InvalidToken()

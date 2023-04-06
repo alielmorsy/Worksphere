@@ -1,11 +1,10 @@
+from django.db.models import DO_NOTHING
 from django.utils.translation import gettext_lazy as _
-from django.db.models import CASCADE, DO_NOTHING
-from djongo.models import DjongoManager, ArrayField
 
+from chat.models import Channel
+from djongo.models import ArrayField
 from management.managers import CompanyManager
 from userAuth.models import User
-from chat.models import Channel
-
 from .abstract_models import *
 
 

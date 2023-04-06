@@ -22,6 +22,8 @@ class CompanyManager(models.Manager):
         company.channels.add(general_channel)
         admin_role = Role(role_name="Admin", role_color=0xFFD700, permissions=DefaultPermissions.ADMIN)  # Golden Color
         admin_role.save()
+        regular_role = Role(role_name="User", role_color=0x000000, permissions=DefaultPermissions.REGULAR_USER)
+        regular_role.save()
         company.roles.add(admin_role)
 
         admin_company_user = CompanyUser(user=user)
@@ -29,6 +31,5 @@ class CompanyManager(models.Manager):
         admin_company_user.save()
 
         company.users.add(admin_company_user)
-        company.save()
 
         return company

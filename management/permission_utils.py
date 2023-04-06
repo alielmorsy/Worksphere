@@ -1,3 +1,10 @@
+from rest_framework.permissions import BasePermission
+
+from management import models
+from management.exceptions import NotAllowed
+from django.utils.translation import gettext as _
+
+
 class DefaultPermissions:
     # General Purpose
     CAN_READ = 1 << 1
@@ -11,4 +18,22 @@ class DefaultPermissions:
     # Cloud space
     CAN_UPLOAD_FILES = 5 << 1
     CAN_DOWNLOAD_FILES = 6 << 1
-    ADMIN = CAN_WRITE | CREATE_REMOVE_CHANNELS | REACT_ON_CHANNEL | CAN_UPLOAD_FILES | CAN_DOWNLOAD_FILES
+
+    # Admin
+    CAN_CHANGE_SETTINGS = 7 << 1
+
+    REGULAR_USER = CAN_READ | CAN_WRITE | REACT_ON_CHANNEL | CAN_UPLOAD_FILES | CAN_DOWNLOAD_FILES
+
+    ADMIN = REGULAR_USER | CAN_CHANGE_SETTINGS | CREATE_REMOVE_CHANNELS
+
+
+class IsUserInCompany(BasePermission):
+
+    def has_permission(self, request, view):
+        user = request.user
+        company_id = view.get_company_id()
+        try:
+            models.Company.objects.get(_id=company_id, users__user___id=user.pk)
+            return True
+        except:
+            raise NotAllowed(detail=_("Not Allowed User"))
