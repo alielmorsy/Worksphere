@@ -80,6 +80,7 @@ class GetAllChannels(APIView, AuthorizedCompanyBase):
     request that accept `company_id` as url parameter and retrieve all channels in it. Checks Done: - User is
     Authenticated. - User is part of the company.
     TODO: When channel is sent to the user, a new query should be done that checks whether the user is allowed to write or read from that channel or not. (Done)
+    TODO: Big Mistake: The permission check is an issue because i am telling the user that he cannot see all channels if he doesn't have any permission.
     """
 
     default_permissions = DefaultPermissions.CAN_READ
