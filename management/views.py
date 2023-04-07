@@ -1,8 +1,9 @@
-
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from management.base import AuthorizedCompanyBase
+from management.permission_utils import DoesUserHavePermission, DefaultPermissions
 from management.serializers import CreateCompanySerializer
 
 
@@ -23,3 +24,8 @@ class CreateNewCompany(APIView):
             "companyId": str(company)
         }
         return Response(response)
+
+
+class CreateTask(APIView, AuthorizedCompanyBase):
+    default_permissions = DefaultPermissions.CAN_ADD_TASKS
+    permission_classes = (IsAuthenticated, DoesUserHavePermission)

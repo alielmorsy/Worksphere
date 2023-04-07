@@ -24,7 +24,6 @@ class DefaultPermissions:
 
     CAN_ADD_TASKS = 256 << 1
 
-
     REGULAR_USER = CAN_WRITE | REACT_ON_CHANNEL | CAN_UPLOAD_FILES | CAN_DOWNLOAD_FILES | CAN_ADD_TASKS
 
     ADMIN = REGULAR_USER | CAN_CHANGE_SETTINGS | CREATE_REMOVE_CHANNELS
@@ -59,8 +58,6 @@ class DoesUserHavePermission(IsUserCompany):
 
         for role in roles:
             permissions = role.permissions
-            if permissions & DefaultPermissions.ADMIN == DefaultPermissions.ADMIN:
-                return True
             if permissions & view.default_permissions == view.default_permissions:
                 return True
-        return False
+        raise RuntimeWarning("Bad Request.")  # TODO: Need to look pretty.
