@@ -2,13 +2,13 @@ from django.utils.translation import gettext as _
 from rest_framework.exceptions import APIException
 
 
-class UserDoesnotExist(APIException):
+class UserNotExists(APIException):
     status_code = 401
     default_detail = _('User Does not exist')
     default_code = 'invalid-credentials'
 
 
-class ChannelDoesnotExist(APIException):
+class ChannelNotExists(APIException):
     status_code = 401
     default_detail = _('Channel Does not exist')
     default_code = 'invalid-credentials'

@@ -6,7 +6,9 @@ from rest_framework.views import APIView
 from management.base import AuthorizedCompanyBase
 from management.models import Company
 from management.permission_utils import IsUserCompany
-from .serializer import CreateChannelSerializer, SendMassageSerializer , GetMessagesSerializer
+from .serializer import CreateChannelSerializer, SendMassageSerializer, GetMessagesSerializer
+
+from django.conf import settings
 
 
 class CreateChannelView(APIView, AuthorizedCompanyBase):
@@ -41,38 +43,33 @@ class CreateChannelView(APIView, AuthorizedCompanyBase):
         return Response(response)
 
 
-
 class GetChannelMessagesView(APIView):
     raise_exception = True
     permission_classes = (IsAuthenticated, IsUserCompany)
+
     def get(self, request):
-        MESSAGES_PER_PAGE = 5
         serializer = GetMessagesSerializer(data=request.query_params)
         serializer.is_valid(raise_exception=True)
-        channelid = request.query_params['channelid']
-        channel = serializer.validate_Channelid(channelid)
-        page = int(request.query_params['page'])
+        data = serializer.validated_data
+        page = data["page"]
+        channel_id = data["channel_id"]
+        channel = data["channel"]
 
         messages = []
-        for message in channel.messages.all()[ MESSAGES_PER_PAGE*(page-1)  : MESSAGES_PER_PAGE*page  ]:  
-            #tried to limit the query by this number as 'all()' function when called return all objects as instance by doing a query for each message id.
-            messages.append(message.get())
+        query = channel.messages.all()[settings.MESSAGES_PER_PAGE * (page - 1): settings.MESSAGES_PER_PAGE * page]
+        for message in query:
+            messages.append(message.to_dict())
 
         response = {
-            "channelId": channelid,
-            "numberOfMessages": MESSAGES_PER_PAGE,
+            "channel_id": channel_id,
+            "numberOfMessages": len(messages),
             "messages": messages
         }
         return Response(response)
-    
+
     def get_company_id(self, request):
         company_id = self.kwargs["company_id"]
         return ObjectId(company_id)
-    
-
-
-
-
 
 
 class GetAllChannels(APIView, AuthorizedCompanyBase):
@@ -106,13 +103,6 @@ class GetAllChannels(APIView, AuthorizedCompanyBase):
     def get_company_id(self, request):
         company_id = self.kwargs["company_id"]
         return ObjectId(company_id)
-
-
-
-
-
-
-
 
 
 # TODO: We don't need that.

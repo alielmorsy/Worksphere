@@ -3,36 +3,28 @@ from management.models import Company
 from .models import *
 from rest_framework import serializers
 from userAuth.models import User
-from .exceptions import UserDoesnotExist, ChannelDoesnotExist , UserIsNotInChannel
+from .exceptions import UserNotExists, ChannelNotExists
 from bson import ObjectId
 
 
 # create a serializer
 
 
-class GetMessagesSerializer(serializers.ModelSerializer):
-    userid = serializers.CharField(max_length=32)
-    channelid = serializers.CharField(max_length=32)
+class GetMessagesSerializer(serializers.Serializer):
+    channel_id = serializers.CharField(max_length=64)
     page = serializers.IntegerField()
 
+    def validate(self, attrs):
+        channel = self.validate_channel_id(attrs["channel_id"])
+        attrs["channel"] = channel
+        return attrs
 
-    def validate_user(self, userid):
+    def validate_channel_id(self, channel_id):
         try:
-            user = User.objects.get(_id=ObjectId(userid))
+            channel = Channel.objects.get(_id=ObjectId(channel_id))
         except:
-            raise UserDoesnotExist()
-        return user
-    
-    def validate_Channelid(self, channelid):
-        #user = User.objects.get(username=username)
-        try:
-            channel = Channel.objects.get(_id = ObjectId(channelid))
-        except:
-            raise ChannelDoesnotExist()
+            raise ChannelNotExists()
         return channel
-    
-
-
 
 
 class CreateChannelSerializer(serializers.ModelSerializer):
@@ -56,22 +48,13 @@ class CreateChannelSerializer(serializers.ModelSerializer):
         try:
             user = User.objects.get(username=createdBy)
         except:
-            raise UserDoesnotExist()
+            raise UserNotExists()
         return user
 
     class Meta:
         model = Channel
         fields = ["channelName", "channelType", "company_id"]
         read_only_fields = ('_id',)
-
-
-
-
-
-
-
-
-
 
 
 class SendMassageSerializer(serializers.ModelSerializer):
@@ -98,7 +81,7 @@ class SendMassageSerializer(serializers.ModelSerializer):
         try:
             user = User.objects.get(username=sender)
         except:
-            raise UserDoesnotExist()
+            raise UserNotExists()
         return user
 
     def validate_and_get_channel(self, Channel):
@@ -106,7 +89,7 @@ class SendMassageSerializer(serializers.ModelSerializer):
         try:
             channel = Channel.objects.get(_id=ObjectId(Channel))
         except:
-            raise ChannelDoesnotExist()
+            raise ChannelNotExists()
         return channel
 
     class Meta:

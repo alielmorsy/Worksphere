@@ -3,7 +3,7 @@ from .models import *
 from . import models
 from rest_framework import serializers
 from userAuth.models import User
-from .exceptions import  UserDoesnotExist, ChannelDoesnotExist,UserIsNotInChannel
+from .exceptions import  UserNotExists, ChannelNotExists,UserIsNotInChannel
 from bson import ObjectId
 
 
@@ -16,7 +16,7 @@ class Validate_channel_and_user():
         try:
             user = User.objects.get(_id=ObjectId(userid))
         except:
-            raise UserDoesnotExist()
+            raise UserNotExists()
         return user
     
     def validate_and_get_Channel(self, channelid):
@@ -24,7 +24,7 @@ class Validate_channel_and_user():
         try:
             channel = models.Channel.objects.get(_id = ObjectId(channelid))
         except:
-            raise ChannelDoesnotExist()
+            raise ChannelNotExists()
         return channel
     def validate(self):      # it will be adjusted later to check if user in company server users
         self.user = self.validate_and_get_sender(self.userid)
