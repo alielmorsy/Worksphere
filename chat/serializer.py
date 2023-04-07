@@ -1,15 +1,38 @@
 from rest_framework import serializers
-
 from management.models import Company
 from .models import *
-from . import models
 from rest_framework import serializers
 from userAuth.models import User
-from .exceptions import UserDoesnotExist, ChannelDoesnotExist
+from .exceptions import UserDoesnotExist, ChannelDoesnotExist , UserIsNotInChannel
 from bson import ObjectId
 
 
 # create a serializer
+
+
+class GetMessagesSerializer(serializers.ModelSerializer):
+    userid = serializers.CharField(max_length=32)
+    channelid = serializers.CharField(max_length=32)
+    page = serializers.IntegerField()
+
+
+    def validate_user(self, userid):
+        try:
+            user = User.objects.get(_id=ObjectId(userid))
+        except:
+            raise UserDoesnotExist()
+        return user
+    
+    def validate_Channelid(self, channelid):
+        #user = User.objects.get(username=username)
+        try:
+            channel = Channel.objects.get(_id = ObjectId(channelid))
+        except:
+            raise ChannelDoesnotExist()
+        return channel
+    
+
+
 
 
 class CreateChannelSerializer(serializers.ModelSerializer):
@@ -42,6 +65,15 @@ class CreateChannelSerializer(serializers.ModelSerializer):
         read_only_fields = ('_id',)
 
 
+
+
+
+
+
+
+
+
+
 class SendMassageSerializer(serializers.ModelSerializer):
     sender = serializers.CharField(max_length=32)
     Channel = serializers.CharField(max_length=32)
@@ -72,7 +104,7 @@ class SendMassageSerializer(serializers.ModelSerializer):
     def validate_and_get_channel(self, Channel):
         # user = User.objects.get(username=username)
         try:
-            channel = models.Channel.objects.get(_id=ObjectId(Channel))
+            channel = Channel.objects.get(_id=ObjectId(Channel))
         except:
             raise ChannelDoesnotExist()
         return channel
