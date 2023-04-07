@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 
 from management.base import AuthorizedCompanyBase
 from management.models import Company
-from management.permission_utils import IsUserCompany
+from management.permission_utils import IsUserCompany, DoesUserHavePermission, DefaultPermissions
 from .serializer import CreateChannelSerializer, SendMassageSerializer, GetMessagesSerializer
 
 from django.conf import settings
@@ -24,11 +24,13 @@ class CreateChannelView(APIView, AuthorizedCompanyBase):
         - User are Authenticated
         - Does User Part of company.
 
-    TODO: Check whether the user who created the channel is admin or not.
+    TODO: Check whether the user who created the channel is admin or not. (DONE)
     TODO: Make the response looks pretty.
     @author Ali Elmorsy
     """
-    permission_classes = (IsAuthenticated, IsUserCompany)
+
+    default_permissions = DefaultPermissions.CREATE_REMOVE_CHANNELS
+    permission_classes = (IsAuthenticated, DoesUserHavePermission)
     raise_exception = True
 
     def post(self, request, *args, **kwargs):
@@ -77,21 +79,23 @@ class GetAllChannels(APIView, AuthorizedCompanyBase):
     When user enters the company chat the first thing should see is all channels in the server. This request is a get
     request that accept `company_id` as url parameter and retrieve all channels in it. Checks Done: - User is
     Authenticated. - User is part of the company.
-    TODO: When channel is sent to the user, a new query should be done that checks whether the user is allowed to write or read from that channel or not.
-
+    TODO: When channel is sent to the user, a new query should be done that checks whether the user is allowed to write or read from that channel or not. (Done)
     """
-    permission_classes = (IsAuthenticated, IsUserCompany)
+
+    default_permissions = DefaultPermissions.CAN_READ
+    permission_classes = (IsAuthenticated, DoesUserHavePermission)
     raise_exception = True
 
     def get(self, request, *args, **kwargs):
         company_id = self.get_company_id(request)
         company = Company.objects.get(_id=company_id)
-        channelsObject = company.channels
+        channels_objects = company.channels
         channels = []
-        for channel_object in channelsObject:
+        for channel_object in channels_objects:
             channel = {"channelName": channel_object.channelName,
                        "channelType": channel_object.channelType,
-                       "channelId": str(channel_object.pk)
+                       "channelId": str(channel_object.pk),
+                       "totalMessages": len(channel_object.messages)
                        }
             channels.append(channel)
         response = {"companyName": company.companyName,

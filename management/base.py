@@ -1,5 +1,7 @@
 from bson import ObjectId
 
+from management.permission_utils import DefaultPermissions
+
 
 class AuthorizedCompanyBase:
     """
@@ -7,6 +9,8 @@ class AuthorizedCompanyBase:
     It contains main function get_company_id which initial implementation which grabs the company_id from
     post body. and return it to be used somewhere else in the code.
     """
+
+    default_permissions = DefaultPermissions.REGULAR_USER
 
     def get_company_id(self, request):
         data = request.data

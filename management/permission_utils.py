@@ -37,7 +37,21 @@ class IsUserCompany(BasePermission):
         user = request.user
         company_id = view.get_company_id()
         try:
-            models.Company.objects.get(_id=company_id, users__user___id=user.pk)
-            return True
+            return models.Company.objects.get(_id=company_id, users__user___id=user.pk)
         except:
             raise NotAllowed(detail=_("Not Allowed User, Or Invalid Company."))
+
+
+class DoesUserHavePermission(IsUserCompany):
+    def has_permission(self, request, view):
+        company = super().has_permission(request, view)
+        company_user = company.users.get(user___id=request.user.pk)
+        roles = company_user.roles
+
+        for role in roles:
+            permissions = role.permissions
+            if permissions & DefaultPermissions.ADMIN == DefaultPermissions.ADMIN:
+                return True
+            if permissions & view.default_permissions == view.default_permissions:
+                return True
+        return False
