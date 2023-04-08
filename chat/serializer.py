@@ -57,6 +57,8 @@ class CreateChannelSerializer(serializers.ModelSerializer):
         read_only_fields = ('_id',)
 
 
+
+
 class SendMassageSerializer(serializers.ModelSerializer):
     sender = serializers.CharField(max_length=32)
     Channel = serializers.CharField(max_length=32)

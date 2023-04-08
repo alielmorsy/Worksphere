@@ -37,7 +37,8 @@ class Task(models.Model):
     createdBy = models.ForeignKey(to=CompanyUser, related_name="createdBy", on_delete=DO_NOTHING)
     assignedTo = ArrayReferenceField(to=CompanyUser, related_name="assignedTo", on_delete=DO_NOTHING)  # Can be
     reviewers = ArrayReferenceField(to=CompanyUser, related_name="reviewers", on_delete=DO_NOTHING)
-    additional_fields = ArrayField(model_container=TaskCustomFields)
+    additional_fields = ArrayField(model_container=TaskCustomFields, null=True, blank=True)
     state = models.IntegerField(choices=StateEnum, default=StateEnum.OPEN)
     subTasks = ArrayReferenceField(to="self", null=True, blank=True)  # Not All Tasks has sub-tasks.
-    manager = DjongoManager()
+    
+    objects = DjongoManager()
