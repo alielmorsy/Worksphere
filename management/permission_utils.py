@@ -11,18 +11,20 @@ class DefaultPermissions:
     CAN_WRITE = 2 << 1 | CAN_READ
 
     # For Chat System
-    CREATE_REMOVE_CHANNELS = 3 << 1
-    REACT_ON_CHANNEL = 4 << 1
-    DELETE_MESSAGES = 5 << 1
+    CREATE_REMOVE_CHANNELS = 4 << 1
+    REACT_ON_CHANNEL = 8 << 1
+    DELETE_MESSAGES = 16 << 1
 
     # Cloud space
-    CAN_UPLOAD_FILES = 5 << 1
-    CAN_DOWNLOAD_FILES = 6 << 1
+    CAN_UPLOAD_FILES = 32 << 1
+    CAN_DOWNLOAD_FILES = 64 << 1
 
     # Admin
-    CAN_CHANGE_SETTINGS = 7 << 1
+    CAN_CHANGE_SETTINGS = 128 << 1
 
-    REGULAR_USER = CAN_READ | CAN_WRITE | REACT_ON_CHANNEL | CAN_UPLOAD_FILES | CAN_DOWNLOAD_FILES
+    CAN_ADD_TASKS = 256 << 1
+
+    REGULAR_USER = CAN_WRITE | REACT_ON_CHANNEL | CAN_UPLOAD_FILES | CAN_DOWNLOAD_FILES | CAN_ADD_TASKS
 
     ADMIN = REGULAR_USER | CAN_CHANGE_SETTINGS | CREATE_REMOVE_CHANNELS
 
@@ -42,6 +44,12 @@ class IsUserCompany(BasePermission):
             raise NotAllowed(detail=_("Not Allowed User, Or Invalid Company."))
 
 
+"""
+- Setup websocket for messages. (Ali)
+- Setup Task API.
+"""
+
+
 class DoesUserHavePermission(IsUserCompany):
     def has_permission(self, request, view):
         company = super().has_permission(request, view)
@@ -50,8 +58,6 @@ class DoesUserHavePermission(IsUserCompany):
 
         for role in roles:
             permissions = role.permissions
-            if permissions & DefaultPermissions.ADMIN == DefaultPermissions.ADMIN:
-                return True
             if permissions & view.default_permissions == view.default_permissions:
                 return True
-        return False
+        raise RuntimeWarning("Bad Request.")  # TODO: Need to look pretty.

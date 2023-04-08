@@ -5,7 +5,8 @@ from .views import *
 channel_patterns = [
     path("create/", CreateChannelView.as_view()),
     re_path(r"/<str:company_id>",GetAllChannels.as_view()),
-    re_path(r"/<str:channelid>/<int:page>",GetChannelMessagesView.as_view()),
+    re_path(r"/<str:channel_id>/<int:page>",GetChannelMessagesView.as_view()),
+
 ]
 
 
