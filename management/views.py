@@ -6,6 +6,7 @@ from management.base import AuthorizedCompanyBase
 from management.permission_utils import DoesUserHavePermission, DefaultPermissions
 from management.serializers import CreateCompanySerializer, CreateTaskSerializer
 from bson import ObjectId
+from userAuth.auth import User
 
 class CreateNewCompany(APIView):
     """
@@ -30,9 +31,10 @@ class CreateTask(APIView, AuthorizedCompanyBase):
     default_permissions = DefaultPermissions.CAN_ADD_TASKS
     permission_classes = (IsAuthenticated, DoesUserHavePermission)
     def post(self , request , *args, **kwargs ):
+        #request.user = User.objects.get(pk=ObjectId('642759c6e1d5e90be8cf1ab8'))  #cant add authorization data to request so i did this trick to test
         serializer = CreateTaskSerializer(data= request.data,)
         serializer.is_valid(raise_exception=True)
-        task = serializer.create(serializer.validated_data)
+        task = serializer.create(serializer.validated_data , request)
         response = {
             "message": "Task Created Successfully",
             "taskId": str(task._id)
