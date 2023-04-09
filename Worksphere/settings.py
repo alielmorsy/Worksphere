@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.messages",
@@ -39,7 +40,8 @@ INSTALLED_APPS = [
     "chat",
     "management",
     "rest_framework",
-    "rest_framework_simplejwt"
+    "rest_framework_simplejwt",
+
 ]
 
 MIDDLEWARE = [
@@ -77,7 +79,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "Worksphere.wsgi.application"
+#WSGI_APPLICATION = "Worksphere.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
@@ -97,6 +99,19 @@ DATABASES = {
 }
 
 AUTH_USER_MODEL = "userAuth.User"
+
+ASGI_APPLICATION = "Worksphere.asgi.application"
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
+
+
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
 

@@ -24,12 +24,16 @@ class Company(models.Model):
 
 
 class Task(models.Model):
-    class StateEnum(models.Choices):
-        OPEN = 0
-        CLOSED = -1
-        FAILED = -2
-        SUBMITTED = 1
-        DONE = 2
+    class ChannelType(models.IntegerChoices):
+        CHAT = 0
+        VOICE = 1
+
+    class State(models.TextChoices):
+        OPEN = 0, _("OPEN")
+        CLOSED = -1, _("CLOSED")
+        FAILED = -2, _("FAILED")
+        SUBMITTED = 1, _("SUBMITTED")
+        DONE = 2, _("DONE")
 
     _id = ObjectIdField()
     taskName = models.CharField(_("taskName"), max_length=128)
@@ -37,8 +41,7 @@ class Task(models.Model):
     createdBy = models.ForeignKey(to=CompanyUser, related_name="createdBy", on_delete=DO_NOTHING)
     assignedTo = ArrayReferenceField(to=CompanyUser, related_name="assignedTo", on_delete=DO_NOTHING)  # Can be
     reviewers = ArrayReferenceField(to=CompanyUser, related_name="reviewers", on_delete=DO_NOTHING)
-    additional_fields = ArrayField(model_container=TaskCustomFields, null=True, blank=True)
-    state = models.IntegerField(choices=StateEnum, default=StateEnum.OPEN)
+    additional_fields = ArrayField(model_container=TaskCustomFields)
     subTasks = ArrayReferenceField(to="self", null=True, blank=True)  # Not All Tasks has sub-tasks.
-    
-    objects = DjongoManager()
+    taskState = models.IntegerField(choices=ChannelType.choices, default=ChannelType.CHAT)
+    manager = DjongoManager()
