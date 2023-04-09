@@ -7,6 +7,7 @@ from management.permission_utils import DoesUserHavePermission, DefaultPermissio
 from management.serializers import CreateCompanySerializer, CreateTaskSerializer
 from bson import ObjectId
 
+
 class CreateNewCompany(APIView):
     """
     API  request responsible for creating new company which using CreateCompanySerializer to validate
@@ -14,7 +15,7 @@ class CreateNewCompany(APIView):
     """
     permission_classes = (IsAuthenticated,)
 
-    def post(self, request ,*args, **kwargs):
+    def post(self, request, *args, **kwargs):
         user = request.user
         serializer = CreateCompanySerializer(data=request.data, )
         serializer.is_valid(raise_exception=True)
@@ -29,15 +30,13 @@ class CreateNewCompany(APIView):
 class CreateTask(APIView, AuthorizedCompanyBase):
     default_permissions = DefaultPermissions.CAN_ADD_TASKS
     permission_classes = (IsAuthenticated, DoesUserHavePermission)
-    def post(self , request , *args, **kwargs ):
-        serializer = CreateTaskSerializer(data= request.data,)
+
+    def post(self, request, *args, **kwargs):
+        serializer = CreateTaskSerializer(data=request.data, )
         serializer.is_valid(raise_exception=True)
-        task = serializer.create(serializer.validated_data)
+        task = serializer.save(user=request.user)
         response = {
             "message": "Task Created Successfully",
             "taskId": str(task._id)
         }
         return Response(response)
-
-
-        
