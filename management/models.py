@@ -40,5 +40,5 @@ class Task(models.Model):
     additional_fields = ArrayField(model_container=TaskCustomFields, null=True, blank=True)
     state = models.IntegerField(choices=State.choices, default=State.OPEN)
     subTasks = ArrayReferenceField(to="self", null=True, blank=True)  # Not All Tasks has sub-tasks.
-    
-    objects = DjongoManager()
+    taskState = models.IntegerField(choices=ChannelType.choices, default=ChannelType.CHAT)
+    manager = DjongoManager()
