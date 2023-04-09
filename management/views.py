@@ -6,6 +6,7 @@ from management.base import AuthorizedCompanyBase
 from management.permission_utils import DoesUserHavePermission, DefaultPermissions
 from management.serializers import CreateCompanySerializer, CreateTaskSerializer
 from bson import ObjectId
+from userAuth.auth import User
 
 
 class CreateNewCompany(APIView):
