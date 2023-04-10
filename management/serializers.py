@@ -1,10 +1,10 @@
 from rest_framework import serializers
 
-from .abstract_models import CompanyUser
 from .models import Company, Task
 from userAuth.auth import User
-from .exceptions import UserNotExists,TaskNotExists
-from bson import ObjectId ,objectid
+from .exceptions import UserNotExists, TaskNotExists
+from bson import ObjectId, ObjectId
+
 
 class CreateCompanySerializer(serializers.ModelSerializer):
     class Meta:
@@ -16,49 +16,62 @@ class CreateCompanySerializer(serializers.ModelSerializer):
         company = Company.objects.create(companyName=validated_data["companyName"], companyOwner=company_owner)
         return company
 
-        
-class CreateTaskSerializer(serializers.ModelSerializer):
-    assignedTo = serializers.ListSerializer(child=serializers.CharField(allow_blank=False), required=False) 
-    reviewers  = serializers.ListSerializer(child=serializers.CharField(allow_blank=True), required=False)
-    assignedTask = serializers.CharField( required=False , allow_blank=True)
-    def create(self, validated_data , request):
-        user = request.user
-        createdBy = CompanyUser.objects.get(user=user)
-        task = Task.objects.create(taskName=validated_data['taskName']   ,   taskDescription=validated_data['taskDescription'] , 
-                                   createdBy=createdBy)
-        print(validated_data['assignedTo'])
-        for user in validated_data['assignedTo']:
-            task.assignedTo.add(user)
-        for user in validated_data['reviewers']:
-            task.reviewers.add(user)
-        task.save()
-        try:
-            assignedTask = validated_data['assignedTask']
-            assignedTask.subTasks.add(task)
-            assignedTask.save()
-        except:
-            pass
-        return task
 
-    def validate_assignedTo(self, assignedTo):
+class AssignedToListSerializer(serializers.ListSerializer):
+    def validate(self, attrs):
         try:
-            return [ CompanyUser.objects.get(pk=ObjectId(userid)) for userid in assignedTo ]
+            return [User.objects.get(pk=ObjectId(userid)) for userid in attrs]
         except:
             raise UserNotExists()
-        
-    def validate_reviewers(self, reviewers):
+
+
+class SubTasksListSerializer(serializers.ListSerializer):
+    def validate(self, attrs):
         try:
-            return [ CompanyUser.objects.get(pk=ObjectId(userid)) for userid in reviewers ]
-        except:
-            raise UserNotExists()
-        
-    def validate_assignedTask(self, assignedTask):
-        try:
-            return Task.objects.get(pk=ObjectId(assignedTask))
+            return [Task.objects.get(pk=ObjectId(task_id)) for task_id in attrs]
         except:
             raise TaskNotExists()
 
+
+class ReviewersListSerializer(serializers.ListSerializer):
+    def validate(self, attrs):
+        try:
+            return [User.objects.get(pk=ObjectId(userid)) for userid in attrs]
+        except:
+            raise UserNotExists()
+
+
+class CreateTaskSerializer(serializers.ModelSerializer):
+    assignedTo = AssignedToListSerializer
+    reviewers = ReviewersListSerializer
+    sub_tasks = SubTasksListSerializer
+
+    def create(self, validated_data):
+        created_by = validated_data["user"]
+        task = Task.objects.create(taskName=validated_data['taskName'],
+                                   taskDescription=validated_data['taskDescription'],
+                                   createdBy=created_by)
+        for userid in validated_data['assignedTo']:
+            task.assignedTo.add(ObjectId(userid))
+        for userid in validated_data['reviewers']:
+            task.reviewers.add(ObjectId(userid))
+        task.save()
+        try:
+            sub_tasks = Task.objects.get(pk=ObjectId(validated_data['sub_tasks']))
+            sub_tasks.subTasks.add(task)
+            sub_tasks.save()
+        except:
+            raise RuntimeWarning("Invalid Information")
+        return task
+
+    def validate_assignedTask(self, assignedTask):
+        try:
+            assignedTask = Task.objects.get(pk=ObjectId(assignedTask))
+        except:
+            raise TaskNotExists()
+        return assignedTask
+
     class Meta:
         model = Task
-        fields = ["taskName", "taskDescription", "assignedTo", "reviewers",  "assignedTask", ]
+        fields = ["taskName", "taskDescription", "assignedTo", "reviewers", "sub_tasks", ]
         read_only_fields = ('_id',)
